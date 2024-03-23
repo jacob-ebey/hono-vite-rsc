@@ -130,7 +130,7 @@ app.use(
 	}),
 );
 
-app.use("*", async (c) => prerender.fetch(c.req.raw));
+app.use("*", compress(), async (c) => prerender.fetch(c.req.raw));
 
 await serve({
 	...app,
