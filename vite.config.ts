@@ -5,6 +5,7 @@ import devServer from "@hono/vite-dev-server";
 import reactRefresh from "@vitejs/plugin-react";
 import { rscClientPlugin, rscServerPlugin } from "unplugin-rsc";
 import { type UserConfig, defineConfig } from "vite";
+import banner from "vite-plugin-banner-injection";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 const serverBuild = process.env.SERVER_BUILD;
@@ -50,6 +51,7 @@ export default defineConfig(
 				},
 			},
 			plugins: [
+				banner({ banner: "//@ts-nocheck\n" }),
 				reactRefresh({}),
 				tsconfigPaths(),
 				serverBuild === "server"

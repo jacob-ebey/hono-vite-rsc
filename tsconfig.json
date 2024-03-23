@@ -1,8 +1,8 @@
 {
-	"exclude": ["node_modules", "dist"],
+	"exclude": ["dist"],
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": ["node", "react/canary", "react-dom/canary"],
+		"types": ["node", "react/experimental", "react-dom/experimental"],
 		"jsx": "react-jsx",
 		"module": "ESNext",
 		"target": "ES2022",
@@ -10,6 +10,7 @@
 		"strict": true,
 		"allowJs": true,
 		"checkJs": true,
+		"skipLibCheck": true,
 		"noEmit": true,
 		"rootDir": ".",
 		"paths": {
