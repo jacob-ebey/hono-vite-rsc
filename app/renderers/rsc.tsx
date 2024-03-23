@@ -9,7 +9,10 @@ import "hono";
 declare module "hono" {
 	interface ContextRenderer {
 		// biome-ignore lint/style/useShorthandFunctionType: declaration merging
-		(node: React.ReactNode): Response | Promise<Response>;
+		(
+			node: React.ReactNode,
+			options?: { status?: number },
+		): Response | Promise<Response>;
 	}
 }
 
@@ -37,7 +40,7 @@ export function rscRenderer(
 		// biome-ignore lint/suspicious/noExplicitAny: overriding behavior and types
 		c.setRenderer(createRenderer(c, Layout, Component) as any);
 
-		return next();
+		await next();
 	};
 }
 
@@ -48,9 +51,12 @@ function createRenderer(
 		React.PropsWithChildren<PropsForRenderer & { Layout: React.FC }>
 	>,
 ) {
-	return (children: React.ReactNode, props: PropsForRenderer & {}) => {
+	return (
+		children: React.ReactNode,
+		{ status = 200 }: PropsForRenderer & {} = {},
+	) => {
 		const element = Component ? (
-			<Component {...props} Layout={Layout}>
+			<Component status={status} Layout={Layout}>
 				{children}
 			</Component>
 		) : (
@@ -80,7 +86,7 @@ function createRenderer(
 		) as ReadableStream<Uint8Array>;
 
 		return new Response(body, {
-			status: 200,
+			status,
 			headers: {
 				"Content-Type": "text/x-component, charset=utf-8",
 				"Transfer-Encoding": "chunked",

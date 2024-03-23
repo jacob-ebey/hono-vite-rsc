@@ -26,6 +26,9 @@ devDependencies:
   '@jacob-ebey/react-server-dom-vite':
     specifier: 0.0.0-85df66a12-20240323
     version: 0.0.0-85df66a12-20240323(react-dom@18.3.0-canary-670811593-20240322)(react@18.3.0-canary-670811593-20240322)
+  '@types/dom-navigation':
+    specifier: ^1.0.3
+    version: 1.0.3
   '@types/node':
     specifier: ^20.11.30
     version: 20.11.30
@@ -1124,6 +1127,10 @@ packages:
     resolution: {integrity: sha512-WXCyOcRtH37HAUkpXhUduaxdm82b4GSlyTqajXviN4EfiuPgNYR109xMCKvpl6zPIpua0DGlMEDCq+g8EdoheQ==}
     dependencies:
       '@babel/types': 7.24.0
+    dev: true
+
+  /@types/dom-navigation@1.0.3:
+    resolution: {integrity: sha512-nbkhQ2o6UUBn1uLwSrA//rFkqs8XRk5d7cE6jzzTl8MAIUs/nFMtFqVESwiYY1HGZxflzbFlXsZ8NNzTaoFs1Q==}
     dev: true
 
   /@types/estree@1.0.5:

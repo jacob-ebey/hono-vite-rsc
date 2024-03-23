@@ -2,7 +2,12 @@
 	"exclude": ["dist"],
 	"compilerOptions": {
 		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": ["node", "react/experimental", "react-dom/experimental"],
+		"types": [
+			"dom-navigation",
+			"node",
+			"react/experimental",
+			"react-dom/experimental"
+		],
 		"jsx": "react-jsx",
 		"module": "ESNext",
 		"target": "ES2022",

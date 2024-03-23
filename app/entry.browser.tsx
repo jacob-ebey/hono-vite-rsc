@@ -7,17 +7,16 @@ import { rscStream } from "rsc-html-stream/client";
 // This installs the module loading runtime and dev HMR runtime
 import "react-runtime";
 
-let data: React.Usable<React.ReactElement>;
-function Router() {
-	data ??= ReactServer.createFromReadableStream(rscStream);
-	return React.use(data);
-}
+import { Router } from "./client-router";
+
+const data: React.Usable<React.ReactElement> =
+	ReactServer.createFromReadableStream(rscStream);
 
 React.startTransition(() => {
 	ReactDOM.hydrateRoot(
 		document,
 		<React.StrictMode>
-			<Router />
+			<Router initialData={data} />
 		</React.StrictMode>,
 	);
 });
