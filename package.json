@@ -1,0 +1,38 @@
+{
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "node dev/start.js",
+		"build": "pnpm build:server && pnpm build:prerender && pnpm build:browser",
+		"build:browser": "SERVER_BUILD=prerender vite build --manifest",
+		"build:server": "SERVER_BUILD=server vite build --ssr",
+		"build:prerender": "SERVER_BUILD=prerender vite build --manifest --ssr",
+		"start": "node server.js"
+	},
+	"pnpm": {
+		"overrides": {
+			"react": "18.3.0-canary-670811593-20240322",
+			"react-dom": "18.3.0-canary-670811593-20240322"
+		}
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.6.2",
+		"@hono/vite-dev-server": "^0.10.0",
+		"@jacob-ebey/react-server-dom-vite": "0.0.0-85df66a12-20240323",
+		"@types/node": "^20.11.30",
+		"@types/react": "^18.2.69",
+		"@types/react-dom": "^18.2.22",
+		"@vitejs/plugin-react": "^4.2.1",
+		"react": "18.3.0-canary-670811593-20240322",
+		"react-dom": "18.3.0-canary-670811593-20240322",
+		"rsc-html-stream": "^0.0.3",
+		"typescript": "^5.4.3",
+		"unplugin-rsc": "^0.0.8",
+		"vite": "^5.2.3",
+		"vite-tsconfig-paths": "^4.3.2"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.8.2",
+		"hono": "^4.1.3"
+	}
+}
