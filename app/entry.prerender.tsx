@@ -1,11 +1,10 @@
 import { Hono } from "hono";
-import { etag } from "hono/etag";
+import { compress } from "hono/compress";
 
 import { htmlRenderer } from "./renderers/html";
 
 const app = new Hono();
 
-app.use("*", etag());
-app.all("*", htmlRenderer($server));
+app.all("*", compress(), htmlRenderer($server));
 
 export default app;

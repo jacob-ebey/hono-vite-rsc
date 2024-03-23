@@ -3,6 +3,8 @@ import * as fsp from "node:fs/promises";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
+import { compress } from "hono/compress";
+import { etag } from "hono/etag";
 
 const browserManifest = JSON.parse(
 	await fsp.readFile("./dist/browser/.vite/manifest.json", "utf-8"),
@@ -115,6 +117,8 @@ const app = new Hono();
 
 app.use(
 	"/assets/*",
+	compress(),
+	etag(),
 	async (c, next) => {
 		await next();
 		if (c.res.status === 200) {
