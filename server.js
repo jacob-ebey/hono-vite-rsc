@@ -4,11 +4,6 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 
-// @ts-ignore - may not exist and no types
-import prerender from "./dist/prerender/entry.prerender.js";
-// @ts-ignore - may not exist and no types
-import server from "./dist/server/entry.server.js";
-
 const browserManifest = JSON.parse(
 	await fsp.readFile("./dist/browser/.vite/manifest.json", "utf-8"),
 );
@@ -89,6 +84,14 @@ global.$server = async (request) => {
 	return server.fetch(request);
 };
 
+const [{ default: prerender }, { default: server }] =
+	/** @type {[{default:Hono}, {default:Hono}]} */ (
+		await Promise.all([
+			import("./dist/prerender/entry.prerender.js"),
+			import("./dist/server/entry.server.js"),
+		])
+	);
+
 const requireCache = new Map();
 global.__vite_require__ = global.__vite_preload__ = (id) => {
 	const cached = requireCache.get(id);
@@ -122,7 +125,8 @@ app.use(
 		root: "dist/browser",
 	}),
 );
-app.route("*", prerender);
+
+app.use("*", async (c) => prerender.fetch(c.req.raw));
 
 await serve({
 	...app,

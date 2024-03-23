@@ -1,43 +1,30 @@
-import * as stream from "node:stream";
-
-// @ts-expect-error - no types
-import ReactServer from "@jacob-ebey/react-server-dom-vite/server";
 import { Hono } from "hono";
 
-import { App } from "./app";
+import { Counter } from "./client";
+import { Document } from "./document";
+import { rscRenderer } from "./renderers/rsc";
 
 const app = new Hono();
 
-app.on("GET", ["/", "/*"], async ({ req }) => {
-	const { abort, pipe } = ReactServer.renderToPipeableStream(
-		<App />,
-		global.$serverManifest,
-		{
-			onError(error: unknown) {
-				console.error(error);
-			},
-		},
+app.use("*", rscRenderer(Document));
+
+app.get("/", async ({ render }) => {
+	return render(
+		<>
+			<title>Hello, Renderer!</title>
+			<h1>Hello, Renderer!</h1>
+			<Counter />
+		</>,
 	);
+});
 
-	req.raw.signal.addEventListener(
-		"abort",
-		() => {
-			abort();
-		},
-		{ once: true },
+app.all("*", ({ render }) => {
+	return render(
+		<>
+			<title>404</title>
+			<h1>404</h1>
+		</>,
 	);
-
-	const body = stream.Readable.toWeb(
-		pipe(new stream.PassThrough()),
-	) as ReadableStream<Uint8Array>;
-
-	return new Response(body, {
-		status: 200,
-		headers: {
-			"Content-Type": "text/x-component, charset=utf-8",
-			"Transfer-Encoding": "chunked",
-		},
-	});
 });
 
 export default app;
