@@ -7,7 +7,7 @@ import type { MiddlewareHandler } from "hono";
 import * as ReactDOM from "react-dom/server";
 import { injectRSCPayload } from "rsc-html-stream/server";
 
-import { Router } from "../client-router";
+import { Router } from "./client-router";
 
 export function htmlRenderer(
 	fetchRSC: (request: Request) => Promise<Response>,

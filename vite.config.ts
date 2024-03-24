@@ -76,14 +76,14 @@ export default defineConfig(
 							onModuleFound,
 						}),
 				{
-					name: "react-runtime",
+					name: "rsc-browser-runtime",
 					resolveId(id) {
-						if (id === "react-runtime") {
+						if (id === "rsc-browser-runtime") {
 							return id;
 						}
 					},
 					load(id) {
-						if (id === "react-runtime") {
+						if (id === "rsc-browser-runtime") {
 							const js = String.raw;
 							const rscRuntime = js`
 							window.__moduleCache__ = new Map();

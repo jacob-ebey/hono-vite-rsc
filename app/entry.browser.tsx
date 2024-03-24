@@ -1,22 +1,9 @@
-// @ts-expect-error - no types
-import ReactServer from "@jacob-ebey/react-server-dom-vite/client";
 import * as React from "react";
-import ReactDOM from "react-dom/client";
-import { rscStream } from "rsc-html-stream/client";
-
 // This installs the module loading runtime and dev HMR runtime
-import "react-runtime";
+import "rsc-browser-runtime";
 
-import { Router } from "./client-router";
-
-const data: React.Usable<React.ReactElement> =
-	ReactServer.createFromReadableStream(rscStream);
+import { hydrate } from "./renderers/dom";
 
 React.startTransition(() => {
-	ReactDOM.hydrateRoot(
-		document,
-		<React.StrictMode>
-			<Router initialData={data} />
-		</React.StrictMode>,
-	);
+	hydrate();
 });

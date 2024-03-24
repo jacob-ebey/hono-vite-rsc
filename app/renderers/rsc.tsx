@@ -11,27 +11,25 @@ declare module "hono" {
 		// biome-ignore lint/style/useShorthandFunctionType: declaration merging
 		(
 			node: React.ReactNode,
-			options?: { status?: number },
+			options?: { status: number },
 		): Response | Promise<Response>;
 	}
 }
 
-type PropsForRenderer = [...Required<Parameters<ContextRenderer>>] extends [
-	unknown,
-	infer Props,
-]
-	? Props
-	: unknown;
+export type PropsForRenderer = React.PropsWithChildren<
+	[...Required<Parameters<ContextRenderer>>] extends [unknown, infer Props]
+		? Props
+		: unknown
+>;
 
 export function rscRenderer(
 	Component?: React.FC<
-		React.PropsWithChildren<
-			PropsForRenderer & { Layout: React.FC<{ children?: React.ReactNode }> }
-		>
+		PropsForRenderer & { Layout: React.FC<React.PropsWithChildren> }
 	>,
 ): MiddlewareHandler {
 	return async (c, next) => {
-		const Layout = (c.getLayout() ?? React.Fragment) as React.FC;
+		const Layout = (c.getLayout() ??
+			React.Fragment) as React.FC<React.PropsWithChildren>;
 		if (Component) {
 			c.setLayout((props) => {
 				return <Component {...props} Layout={Layout} />;
@@ -46,14 +44,14 @@ export function rscRenderer(
 
 function createRenderer(
 	c: Context,
-	Layout: React.FC<{ children?: React.ReactNode }>,
+	Layout: React.FC<React.PropsWithChildren>,
 	Component?: React.FC<
-		React.PropsWithChildren<PropsForRenderer & { Layout: React.FC }>
+		PropsForRenderer & { Layout: React.FC<React.PropsWithChildren> }
 	>,
 ) {
 	return (
 		children: React.ReactNode,
-		{ status = 200 }: PropsForRenderer & {} = {},
+		{ status = 200 }: PropsForRenderer = { status: 200 },
 	) => {
 		const element = Component ? (
 			<Component status={status} Layout={Layout}>

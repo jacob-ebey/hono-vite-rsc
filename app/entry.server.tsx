@@ -8,6 +8,25 @@ const app = new Hono();
 
 app.use("*", rscRenderer(Document));
 
+app.use(
+	"*",
+	rscRenderer(({ Layout, children }) => (
+		<Layout>
+			<nav>
+				<ul>
+					<li>
+						<a href="/">Home</a>
+					</li>
+					<li>
+						<a href="/about">About</a>
+					</li>
+				</ul>
+			</nav>
+			{children}
+		</Layout>
+	)),
+);
+
 app.get("/", async (c) => {
 	return c.render(
 		<>

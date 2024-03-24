@@ -9,10 +9,21 @@ export function Router({
 	const [transitioning, startTransition] = React.useTransition();
 
 	React.useEffect(() => {
-		if (!window.navigation) return;
+		if (!window.navigation) {
+			console.error(
+				"No navigation object found on window, client-side routing will not work.",
+			);
+			return;
+		}
 
 		const onNavigate = (event: NavigateEvent) => {
-			if (!event.canIntercept) return;
+			if (
+				!event.canIntercept ||
+				event.defaultPrevented ||
+				event.downloadRequest ||
+				event.navigationType === "reload"
+			)
+				return;
 
 			const url = new URL(event.destination.url);
 			if (url.origin !== window.location.origin) return;
@@ -25,12 +36,20 @@ export function Router({
 				}),
 			);
 
-			startTransition(() => {
-				setData(newData);
+			event.intercept({
+				scroll: "after-transition",
+				async handler() {
+					startTransition(() => {
+						setData(newData);
+					});
+				},
 			});
 		};
 
 		window.navigation.addEventListener("navigate", onNavigate);
+		return () => {
+			window.navigation.removeEventListener("navigate", onNavigate);
+		};
 	}, []);
 
 	return React.use(data);

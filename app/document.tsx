@@ -1,18 +1,12 @@
-export function Document({
-	children,
-	Layout,
-}: {
-	children?: React.ReactNode;
-	Layout: React.FC<{ children?: React.ReactNode }>;
-}) {
+import type { PropsForRenderer } from "./renderers/rsc";
+
+export function Document({ children }: PropsForRenderer) {
 	return (
-		<Layout>
-			<html lang="en">
-				<head>
-					<meta charSet="utf-8" />
-				</head>
-				<body>{children}</body>
-			</html>
-		</Layout>
+		<html lang="en">
+			<head>
+				<meta charSet="utf-8" />
+			</head>
+			<body>{children}</body>
+		</html>
 	);
 }
