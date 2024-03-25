@@ -26,11 +26,12 @@ export async function callServer(id: string, args: unknown[]) {
 		},
 	);
 
+	const result = await data;
 	if (!signal.aborted) {
 		setData(data);
 	}
 
-	return (await data).data;
+	return result.data;
 }
 
 export function Router({
