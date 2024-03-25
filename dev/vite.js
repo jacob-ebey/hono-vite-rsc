@@ -61,7 +61,7 @@ global.$serverManifest = new Proxy(
 );
 
 const requireCache = new Map();
-global.__vite_require__ = global.__vite_preload__ = (id) => {
+global.__vite_require__ = (id) => {
 	const cached = requireCache.get(id);
 	if (cached) return cached;
 
@@ -79,10 +79,16 @@ global.__vite_require__ = global.__vite_preload__ = (id) => {
 	return promise;
 };
 
+global.__vite_preload__ = (id) => {
+	const loaded = global.__vite_require__(id);
+	if (typeof loaded.then === "function") return loaded;
+	return Promise.resolve(loaded);
+};
+
 global.$server = async (request) => {
 	// Reset every request to make sure things don't go stale
 	const requireCache = new Map();
-	global.__vite_require__ = global.__vite_preload__ = (id) => {
+	global.__vite_require__ = (id) => {
 		const cached = requireCache.get(id);
 		if (cached) return cached;
 
