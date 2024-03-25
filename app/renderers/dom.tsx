@@ -4,10 +4,10 @@ import * as React from "react";
 import ReactDOM from "react-dom/client";
 import { rscStream } from "rsc-html-stream/client";
 
-import { Router } from "./client-router";
+import { Router, callServer } from "./client-router";
 
 const data: React.Usable<React.ReactElement> =
-	ReactServer.createFromReadableStream(rscStream);
+	ReactServer.createFromReadableStream(rscStream, { callServer });
 
 export function hydrate() {
 	return ReactDOM.hydrateRoot(

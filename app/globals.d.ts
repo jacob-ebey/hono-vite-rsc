@@ -21,3 +21,7 @@ declare var $assets: {
 
 // biome-ignore lint/style/noVar: globals are var
 declare var $server: (request: Request) => Promise<Response>;
+
+interface RequestInit {
+	duplex?: "half";
+}

@@ -136,12 +136,13 @@ export default defineConfig(
 				external:
 					mode === "development"
 						? [
+								"busboy",
 								"hono",
 								"react",
 								"react-dom",
 								"@jacob-ebey/react-server-dom-vite",
 							]
-						: ["hono"],
+						: ["busboy", "hono"],
 				noExternal: true,
 				resolve:
 					serverBuild === "server"

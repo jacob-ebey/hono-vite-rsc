@@ -60,6 +60,25 @@ global.$serverManifest = new Proxy(
 	},
 );
 
+const requireCache = new Map();
+global.__vite_require__ = global.__vite_preload__ = (id) => {
+	const cached = requireCache.get(id);
+	if (cached) return cached;
+
+	const promise =
+		/** @type {Promise<unknown> & {value?: unknown; error?: unknown}} */ (
+			devServer.ssrLoadModule(id, { fixStacktrace: true }).then(
+				// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+				(r) => (promise.value = r),
+				// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+				(e) => (promise.error = e),
+			)
+		);
+	requireCache.set(id, promise);
+	promise.then((r) => requireCache.set(id, r));
+	return promise;
+};
+
 global.$server = async (request) => {
 	// Reset every request to make sure things don't go stale
 	const requireCache = new Map();
@@ -89,6 +108,7 @@ global.$server = async (request) => {
 
 	const response = await fetch(serverUrl, {
 		body: request.body,
+		duplex: request.method === "POST" ? "half" : undefined,
 		headers: request.headers,
 		method: request.method,
 		signal: request.signal,

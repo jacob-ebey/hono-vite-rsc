@@ -1,18 +1,38 @@
 import * as stream from "node:stream";
+import type * as nodeWebStream from "node:stream/web";
 
 // @ts-expect-error - no types
-import ReactServer from "@jacob-ebey/react-server-dom-vite/server";
+import ReactServer from "@jacob-ebey/react-server-dom-vite/server.node";
 import * as React from "react";
-import type { Context, ContextRenderer, MiddlewareHandler } from "hono";
+import type {
+	Context,
+	ContextRenderer,
+	Env,
+	Input,
+	MiddlewareHandler,
+} from "hono";
 import "hono";
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type AwaitedReturnType<T> = T extends (...args: any[]) => infer R
+	? Awaited<R>
+	: unknown;
 
 declare module "hono" {
 	interface ContextRenderer {
 		// biome-ignore lint/style/useShorthandFunctionType: declaration merging
 		(
-			node: React.ReactNode,
+			component: React.FC,
 			options?: { status: number },
 		): Response | Promise<Response>;
+	}
+
+	interface ContextVariableMap {
+		formState<T>(
+			action: T,
+		):
+			| { ran: true; result: AwaitedReturnType<T> }
+			| { ran: false; result: undefined };
 	}
 }
 
@@ -21,6 +41,16 @@ export type PropsForRenderer = React.PropsWithChildren<
 		? Props
 		: unknown
 >;
+
+async function loadAction(actionId: string) {
+	const [modId, ...rest] = actionId.split("#");
+	const exp = rest.join("#");
+	const mod = (await globalThis.__vite_require__(modId)) as Record<
+		string | number | symbol,
+		(...args: unknown[]) => unknown
+	>;
+	return mod?.[exp];
+}
 
 export function rscRenderer(
 	Component?: React.FC<
@@ -37,6 +67,55 @@ export function rscRenderer(
 		}
 		// biome-ignore lint/suspicious/noExplicitAny: overriding behavior and types
 		c.setRenderer(createRenderer(c, Layout, Component) as any);
+		c.set("formState", (action) => {
+			const formState = c.get("_formState");
+			if (
+				formState?.action?.$$id === (action as unknown as { $$id: string }).$$id
+			) {
+				return {
+					ran: true,
+					result: formState.data,
+				};
+			}
+
+			return {
+				ran: false,
+				result: undefined,
+			};
+		});
+
+		const actionId = c.req.raw.headers.get("rsc-action-id");
+		console.log({ actionId });
+		const contentType = c.req.raw.headers.get("content-type");
+		const isFormData =
+			!!contentType && !!contentType?.match(/\bmultipart\/form\-data\b/);
+
+		if (actionId) {
+			const action = await loadAction(actionId);
+
+			if (action) {
+				let reply: string | FormData;
+
+				if (isFormData) {
+					reply = await c.req.formData();
+				} else {
+					reply = await c.req.text();
+				}
+
+				const args = await ReactServer.decodeReply(reply);
+				const data = await action.apply(null, args);
+				c.set("_formState", { action, data });
+			} else {
+				throw new Error(`Action not found: ${actionId}`);
+			}
+		} else if (c.req.method === "POST" && isFormData) {
+			const action = await ReactServer.decodeAction(
+				await c.req.formData(),
+				global.$serverManifest,
+			);
+			const data = await action();
+			c.set("_formState", { action, data });
+		}
 
 		await next();
 	};
@@ -50,19 +129,21 @@ function createRenderer(
 	>,
 ) {
 	return (
-		children: React.ReactNode,
+		Route: React.FC,
 		{ status = 200 }: PropsForRenderer = { status: 200 },
 	) => {
 		const element = Component ? (
 			<Component status={status} Layout={Layout}>
-				{children}
+				<Route />
 			</Component>
 		) : (
-			children
+			<Route />
 		);
 
+		const { data } = c.get("_formState") || {};
+
 		const { abort, pipe } = ReactServer.renderToPipeableStream(
-			element,
+			{ element, data },
 			global.$serverManifest,
 			{
 				onError(error: unknown) {

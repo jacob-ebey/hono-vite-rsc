@@ -24,6 +24,8 @@ export function htmlRenderer(
 			global.$prerenderManifest,
 		);
 
+		const { formState } = await data;
+
 		let status = serverResponse.status;
 
 		const body = await new Promise<ReadableStream<Uint8Array>>(
@@ -33,6 +35,7 @@ export function htmlRenderer(
 					<Router initialData={data} />,
 					{
 						bootstrapModules: [...$assets.chunks, $assets.entry],
+						formState,
 						onShellError(error) {
 							reject(error);
 						},
